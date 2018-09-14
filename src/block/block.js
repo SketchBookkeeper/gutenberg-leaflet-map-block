@@ -11,6 +11,7 @@ import './editor.scss';
 
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
+const { Component } = wp.element;
 
 /**
  * Register: aa Gutenberg Block.
@@ -27,67 +28,56 @@ const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.b
  */
 registerBlockType( 'cgb/block-gutenberg-leaflet-map-block', {
 	// Block name. Block names must be string that contains a namespace prefix. Example: my-plugin/my-custom-block.
-	title: __( 'gutenberg-leaflet-map-block - CGB Block' ), // Block title.
-	icon: 'shield', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
-	category: 'common', // Block category — Group blocks together based on common traits E.g. common, formatting, layout widgets, embed.
+	title: __( 'gutenberg-leaflet-map-block' ), // Block title.
+	icon: 'location', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
+	category: 'embed', // Block category — Group blocks together based on common traits E.g. common, formatting, layout widgets, embed.
 	keywords: [
-		__( 'gutenberg-leaflet-map-block — CGB Block' ),
-		__( 'CGB Example' ),
-		__( 'create-guten-block' ),
+		__( 'gutenberg-leaflet-map-block' ),
+		__( 'Map' ),
+		__( 'Leaflet JS' ),
 	],
 
-	/**
-	 * The edit function describes the structure of your block in the context of the editor.
-	 * This represents what the editor will render when the block is used.
-	 *
-	 * The "edit" property must be a valid function.
-	 *
-	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
-	 */
-	edit: function( props ) {
-		// Creates a <p class='wp-block-cgb-block-gutenberg-leaflet-map-block'></p>.
-		return (
-			<div className={ props.className }>
-				<p>— Hello from the backend.</p>
-				<p>
-					CGB BLOCK: <code>gutenberg-leaflet-map-block</code> is a new Gutenberg block
-				</p>
-				<p>
-					It was created via{ ' ' }
-					<code>
-						<a href="https://github.com/ahmadawais/create-guten-block">
-							create-guten-block
-						</a>
-					</code>.
-				</p>
-			</div>
-		);
+	edit: function() {
+		return new mapBlock();
 	},
 
-	/**
-	 * The save function defines the way in which the different attributes should be combined
-	 * into the final markup, which is then serialized by Gutenberg into post_content.
-	 *
-	 * The "save" property must be specified and must be a valid function.
-	 *
-	 * @link https://wordpress.org/gutenberg/handbook/block-api/block-edit-save/
-	 */
 	save: function( props ) {
-		return (
-			<div>
-				<p>— Hello from the frontend.</p>
-				<p>
-					CGB BLOCK: <code>gutenberg-leaflet-map-block</code> is a new Gutenberg block.
-				</p>
-				<p>
-					It was created via{ ' ' }
-					<code>
-						<a href="https://github.com/ahmadawais/create-guten-block">
-							create-guten-block
-						</a>
-					</code>.
-				</p>
-			</div>
-		);
+
 	},
 } );
+
+/**
+ * Edit
+ */
+class mapBlock extends Component {
+	constructor( props ) {
+		super( props );
+		this.mapContainer = React.createRef();
+		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
+	}
+
+	render() {
+		const styles = {
+			height: '300px',
+			background: '#67B6E3',
+		};
+
+		return (
+			<div style={ styles } ref={ this.mapContainer }></div>
+		);
+	}
+
+	componentDidMount() {
+		this.map = L.map( this.mapContainer.current ).setView( [ 51.505, -0.09 ], 13 );
+
+		L.tileLayer(
+			'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
+			{
+				attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+				maxZoom: 18,
+				id: 'mapbox.streets',
+				accessToken: this.mapboxApiKey,
+			}
+		).addTo( this.map );
+	}
+}
