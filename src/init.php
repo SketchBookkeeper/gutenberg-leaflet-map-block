@@ -23,15 +23,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 function gutenberg_leaflet_map_block_block_assets() {
 	// Scripts
 	wp_enqueue_script(
-		'gutenberg_leaflet_map_block-block-js', // Handle.
-		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
-		array( 'wp-blocks', 'wp-i18n', 'wp-element' ), // Dependencies, defined above.
-		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: filemtime — Gets file modification time.
+		'gutenberg_leaflet_map_block-frontend-js', // Handle.
+		plugins_url( '/dist/frontend.js', dirname( __FILE__ ) ),
+		array( 'wp-blocks', 'wp-i18n', 'wp-element' ),
+		filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: filemtime — Gets file modification time.
 		true // Enqueue the script in the footer.
 	);
 
 	wp_localize_script(
-		'gutenberg_leaflet_map_block-block-js',
+		'gutenberg_leaflet_map_block-frontend-js',
 		'gutenberg_leaflet_map_block',
 		[ 'mapbox_api_key' => get_option( 'gutenberg_leafletjs_mapbox_api_key' ) ]
 	);
@@ -74,7 +74,7 @@ function gutenberg_leaflet_map_block_editor_assets() {
 		'gutenberg_leaflet_map_block-block-js', // Handle.
 		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
 		array( 'wp-blocks', 'wp-i18n', 'wp-element' ), // Dependencies, defined above.
-		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: filemtime — Gets file modification time.
+		filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: filemtime — Gets file modification time.
 		true // Enqueue the script in the footer.
 	);
 

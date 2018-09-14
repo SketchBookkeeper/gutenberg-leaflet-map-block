@@ -26,9 +26,9 @@ const { Component } = wp.element;
  * @return {?WPBlock}          The block, if it has been successfully
  *                             registered; otherwise `undefined`.
  */
-registerBlockType( 'cgb/block-gutenberg-leaflet-map-block', {
+registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-block', {
 	// Block name. Block names must be string that contains a namespace prefix. Example: my-plugin/my-custom-block.
-	title: __( 'gutenberg-leaflet-map-block' ), // Block title.
+	title: __( 'Leaflet Map' ), // Block title.
 	icon: 'location', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
 	category: 'embed', // Block category — Group blocks together based on common traits E.g. common, formatting, layout widgets, embed.
 	keywords: [
@@ -42,7 +42,9 @@ registerBlockType( 'cgb/block-gutenberg-leaflet-map-block', {
 	},
 
 	save: function( props ) {
-
+		return (
+			<div data-gutenberg-leaflet-map-block='{ "maxZoom": 18, "id": "mapbox.streets" }' ></div>
+		);
 	},
 } );
 
