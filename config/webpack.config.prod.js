@@ -104,6 +104,10 @@ module.exports = {
 				},
 			},
 			{
+				test: /.css$/,
+				use: blocksCSSPlugin.extract( extractConfig ),
+			},
+			{
 				test: /style\.s?css$/,
 				exclude: /(node_modules|bower_components)/,
 				use: blocksCSSPlugin.extract( extractConfig ),
@@ -112,6 +116,17 @@ module.exports = {
 				test: /editor\.s?css$/,
 				exclude: /(node_modules|bower_components)/,
 				use: editBlocksCSSPlugin.extract( extractConfig ),
+			},
+			{
+				test: /\.(png|jpg|gif|svg)$/, // Images
+				use: [
+					{
+						loader: 'file-loader', // @see https://webpack.js.org/loaders/file-loader/
+						options: {
+							name: 'dist/images/[name].[ext]',
+						},
+					},
+				],
 			},
 		],
 	},
