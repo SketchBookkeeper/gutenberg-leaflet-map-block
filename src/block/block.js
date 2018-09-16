@@ -84,6 +84,10 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			type: 'integer',
 			default: 300,
 		},
+		zoom: {
+			type: 'integer',
+			default: 12,
+		},
 	},
 
 	edit: function( props ) {
@@ -158,6 +162,21 @@ class mapBlock extends Component {
 							min={ 150 }
 							max={ 800 }
 						/>
+
+						<RangeControl
+							label={ __( 'Default Zoom' ) }
+							value={ attributes.zoom }
+							onChange={ ( value ) => {
+								if ( value > 18 || value < 2 ) {
+									return;
+								}
+
+								setAttributes( { zoom: value } );
+							} }
+							min={ 2 }
+							max={ 18 }
+							help="choose between 2 and 18, 18 being completely zoomed in"
+						/>
 					</PanelBody>
 				</InspectorControls>
 
@@ -170,7 +189,9 @@ class mapBlock extends Component {
 	}
 
 	componentDidMount() {
-		this.map = L.map( this.mapContainer.current ).setView( this.props.attributes.mapLatLng, 13 );
+		this.map = L.map( this.mapContainer.current )
+			.setView( this.props.attributes.mapLatLng, this.props.attributes.zoom );
+
 		this.marker = L.marker( this.props.attributes.markerLatLng ).addTo( this.map );
 
 		// Set Tiles
@@ -220,8 +241,13 @@ class mapBlock extends Component {
 		} );
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate( prevProps ) {
 		// Marker will update when the attribute is updated
 		this.marker.setLatLng( this.props.attributes.markerLatLng );
+
+		// Preview zoom level if changed
+		if ( prevProps.attributes.zoom !== this.props.attributes.zoom ) {
+			this.map.setZoom( this.props.attributes.zoom );
+		}
 	}
 }
