@@ -86,26 +86,26 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 class mapBlock extends Component {
 	constructor( props ) {
 		super( props );
-		this.attributes = props.attributes;
-		this.setAttributes = props.setAttributes;
+
 		this.mapContainer = React.createRef();
 		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
+		this.updateAddress = this.updateAddress.bind( this );
 	}
 
 	updateAddress( value ) {
-		this.setAttributes( {
+		this.props.setAttributes( {
 			address: value,
 		} );
 	}
 
 	updateMapLatlng( value ) {
-		this.setAttributes( {
+		this.props.setAttributes( {
 			mapLatLng: value,
 		} );
 	}
 
 	updateMarkerLatlng( value ) {
-		this.setAttributes( {
+		this.props.setAttributes( {
 			markerLatLng: value,
 		} );
 	}
@@ -118,15 +118,15 @@ class mapBlock extends Component {
 
 		return (
 			<div>
-				<p>{ this.address }</p>
+				<p>{ this.props.attributes.address }</p>
 				<div style={ styles } ref={ this.mapContainer }></div>
 			</div>
 		);
 	}
 
 	componentDidMount() {
-		this.map = L.map( this.mapContainer.current ).setView( this.attributes.mapLatLng, 13 );
-		this.marker = L.marker( this.attributes.markerLatLng ).addTo( this.map );
+		this.map = L.map( this.mapContainer.current ).setView( this.props.attributes.mapLatLng, 13 );
+		this.marker = L.marker( this.props.attributes.markerLatLng ).addTo( this.map );
 
 		// Set Tiles
 		L.tileLayer(
@@ -164,8 +164,8 @@ class mapBlock extends Component {
 
 			this.marker.setLatLng( latlng );
 
-			this.updateMapLatlng( latlng );
 			this.updateMarkerLatlng( latlng );
+			this.updateMapLatlng( latlng );
 
 			// Get address name from latlng
 			L.Control.Geocoder.nominatim().reverse(
