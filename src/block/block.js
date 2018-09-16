@@ -87,15 +87,27 @@ class mapBlock extends Component {
 	constructor( props ) {
 		super( props );
 		this.attributes = props.attributes;
+		this.setAttributes = props.setAttributes;
 		this.mapContainer = React.createRef();
 		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
-
-		this.updateAddress = this.updateAddress.bind( this );
 	}
 
-	updateAddress( address ) {
-		const { setAttributes } = this.props;
-		setAttributes( address );
+	updateAddress( value ) {
+		this.setAttributes( {
+			address: value,
+		} );
+	}
+
+	updateMapLatlng( value ) {
+		this.setAttributes( {
+			mapLatLng: value,
+		} );
+	}
+
+	updateMarkerLatlng( value ) {
+		this.setAttributes( {
+			markerLatLng: value,
+		} );
 	}
 
 	render() {
@@ -106,7 +118,7 @@ class mapBlock extends Component {
 
 		return (
 			<div>
-				<p>{ this.attributes.address }</p>
+				<p>{ this.address }</p>
 				<div style={ styles } ref={ this.mapContainer }></div>
 			</div>
 		);
@@ -140,11 +152,9 @@ class mapBlock extends Component {
 				this.map.setView( latlng );
 
 				// Save location
-				this.attributes.mapLatLng = latlng;
-				this.attributes.markerLatLng = latlng;
-				this.attributes.address = e.geocode.name;
-
-				this.updateAddress( this.attributes.address );
+				this.updateMapLatlng( latlng );
+				this.updateMarkerLatlng( latlng );
+				this.updateAddress( e.geocode.name );
 			} )
 			.addTo( this.map );
 
@@ -153,8 +163,9 @@ class mapBlock extends Component {
 			const latlng = [ e.latlng.lat, e.latlng.lng ];
 
 			this.marker.setLatLng( latlng );
-			this.attributes.mapLatLng = latlng;
-			this.attributes.markerLatLng = latlng;
+
+			this.updateMapLatlng( latlng );
+			this.updateMarkerLatlng( latlng );
 
 			// Get address name from latlng
 			L.Control.Geocoder.nominatim().reverse(
@@ -163,12 +174,10 @@ class mapBlock extends Component {
 				( results ) => {
 					// Save the address name
 					if ( ! results.hasOwnProperty( 0 ) ) {
-						this.attributes.address = 'unknown';
+						this.updateAddress( 'unknown' );
 					} else {
-						this.attributes.address = results[ 0 ].name;
+						this.updateAddress( results[ 0 ].name, );
 					}
-
-					this.updateAddress( this.attributes.address );
 				}
 			);
 		} );
