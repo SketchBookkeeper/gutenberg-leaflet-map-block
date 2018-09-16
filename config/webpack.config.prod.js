@@ -118,10 +118,10 @@ module.exports = {
 				use: editBlocksCSSPlugin.extract( extractConfig ),
 			},
 			{
-				test: /\.(png|jpg|gif|svg)$/, // Images
+				test: /\.(png|jpg|gif|svg)$/,
 				use: [
 					{
-						loader: 'file-loader', // @see https://webpack.js.org/loaders/file-loader/
+						loader: 'file-loader',
 						options: {
 							name: 'dist/images/[name].[ext]',
 						},
