@@ -26,10 +26,26 @@ import 'leaflet-control-geocoder';
 
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
-const { Component } = wp.element;
+const { InspectorControls } = wp.editor;
+
+const {
+	Component,
+	Fragment,
+} = wp.element;
+
+const {
+	PanelBody,
+	Placeholder,
+	QueryControls,
+	RangeControl,
+	SelectControl,
+	Spinner,
+	TextControl,
+	ToggleControl,
+} = wp.components;
 
 /**
- * Register: aa Gutenberg Block.
+ * Register: a Gutenberg Block.
  *
  * Registers a new block provided a unique name and an object defining its
  * behavior. Once registered, the block is made editor as an option to any
@@ -64,10 +80,14 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			type: 'string',
 			default: 'London, Greater London, England, United Kingdom',
 		},
+		height: {
+			type: 'integer',
+			default: 300,
+		},
 	},
 
-	edit: function( attributes, setAttributes ) {
-		return new mapBlock( attributes );
+	edit: function( props ) {
+		return new mapBlock( props );
 	},
 
 	save: function( props ) {
@@ -89,7 +109,6 @@ class mapBlock extends Component {
 
 		this.mapContainer = React.createRef();
 		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
-		this.updateAddress = this.updateAddress.bind( this );
 	}
 
 	updateAddress( value ) {
@@ -110,17 +129,43 @@ class mapBlock extends Component {
 		} );
 	}
 
+	updateLocation( latlng, address ) {
+		// Update multiple at once for expected responses from the
+		// forward and back buttons in the Gutenberg UI.
+		this.props.setAttributes( {
+			markerLatLng: latlng,
+			mapLatLng: latlng,
+			address: address,
+		} );
+	}
+
 	render() {
+		const { attributes, setAttributes } = this.props;
+
 		const styles = {
-			height: '300px',
+			height: `${ this.props.attributes.height }px`,
 			background: '#67B6E3',
 		};
 
 		return (
-			<div>
-				<p>{ this.props.attributes.address }</p>
-				<div style={ styles } ref={ this.mapContainer }></div>
-			</div>
+			<Fragment>
+				<InspectorControls>
+					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
+						<RangeControl
+							label={ __( 'Height' ) }
+							value={ attributes.height }
+							onChange={ ( value ) => setAttributes( { height: value } ) }
+							min={ 150 }
+							max={ 800 }
+						/>
+					</PanelBody>
+				</InspectorControls>
+
+				<div>
+					<p>{ this.props.attributes.address }</p>
+					<div style={ styles } ref={ this.mapContainer }></div>
+				</div>
+			</Fragment>
 		);
 	}
 
@@ -147,14 +192,11 @@ class mapBlock extends Component {
 			.on( 'markgeocode', e => {
 				const latlng = [ e.geocode.center.lat, e.geocode.center.lng ];
 
-				// Set marker and map
-				this.marker.setLatLng( latlng );
-				this.map.setView( latlng );
+				// Set new view for user
+				this.map.flyTo( latlng );
 
 				// Save location
-				this.updateMapLatlng( latlng );
-				this.updateMarkerLatlng( latlng );
-				this.updateAddress( e.geocode.name );
+				this.updateLocation( latlng, e.geocode.name );
 			} )
 			.addTo( this.map );
 
@@ -162,24 +204,24 @@ class mapBlock extends Component {
 		this.map.on( 'click', e => {
 			const latlng = [ e.latlng.lat, e.latlng.lng ];
 
-			this.marker.setLatLng( latlng );
-
-			this.updateMarkerLatlng( latlng );
-			this.updateMapLatlng( latlng );
-
 			// Get address name from latlng
 			L.Control.Geocoder.nominatim().reverse(
 				e.latlng,
 				18,
 				( results ) => {
-					// Save the address name
+					// Update the location
 					if ( ! results.hasOwnProperty( 0 ) ) {
-						this.updateAddress( 'unknown' );
+						this.updateLocation( latlng, 'unknown' );
 					} else {
-						this.updateAddress( results[ 0 ].name, );
+						this.updateLocation( latlng, results[ 0 ].name );
 					}
 				}
 			);
 		} );
+	}
+
+	componentDidUpdate() {
+		// Marker will update when the attribute is updated
+		this.marker.setLatLng( this.props.attributes.markerLatLng );
 	}
 }
