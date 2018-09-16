@@ -26,7 +26,10 @@ import 'leaflet-control-geocoder';
 
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
-const { InspectorControls } = wp.editor;
+const {
+	InspectorControls,
+	MediaUpload
+} = wp.editor;
 
 const {
 	Component,
@@ -34,7 +37,9 @@ const {
 } = wp.element;
 
 const {
+	Button,
 	PanelBody,
+	ColorPalette,
 	Placeholder,
 	QueryControls,
 	RangeControl,
@@ -42,6 +47,7 @@ const {
 	Spinner,
 	TextControl,
 	ToggleControl,
+	Notice,
 } = wp.components;
 
 /**
@@ -88,6 +94,22 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			type: 'integer',
 			default: 12,
 		},
+		mapContainerBackground: {
+			type: 'string',
+			default: '#67B6E3',
+		},
+		customIconID: {
+			type: 'integer',
+		},
+		customIconURL: {
+			type: 'string',
+		},
+		customIconWidth: {
+			type: 'integer',
+		},
+		customIconHeight: {
+			type: 'integer',
+		},
 	},
 
 	edit: function( props ) {
@@ -113,8 +135,29 @@ class mapBlock extends Component {
 
 		this.mapContainer = React.createRef();
 		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
+
+		this.state = {
+			iconError: false,
+		};
+
+		this.showIconError.bind( this );
+		this.hideIconError.bind( this );
 	}
 
+	//
+	// State Management
+	//
+	showIconError() {
+		this.setState( { iconError: true } );
+	}
+
+	hideIconError() {
+		this.setState( { iconError: false } );
+	}
+
+	//
+	// Update Methods
+	//
 	updateAddress( value ) {
 		this.props.setAttributes( {
 			address: value,
@@ -143,12 +186,56 @@ class mapBlock extends Component {
 		} );
 	}
 
+	updateIcon( icon ) {
+		this.props.setAttributes( {
+			customIconID: icon.id,
+			customIconURL: icon.url,
+			customIconWidth: icon.width,
+			customIconHeight: icon.height,
+		} );
+	}
+
+	validateIcon( icon ) {
+		if (
+			icon.mime !== 'image/png' ||
+			icon.height > 100 ||
+			icon.width > 100
+		) {
+			return false;
+		}
+
+		return true;
+	}
+
+	//
+	// Map Helper Functions
+	//
+	createCustomIcon( iconUrl, iconWidth, iconHeight ) {
+		// Center the anchor point based the on the icon width
+		const iconAnchor = [ ( iconWidth / 2 ), iconHeight ];
+
+		return L.icon( {
+			iconUrl,
+			iconAnchor,
+			iconSize: [ iconWidth, iconHeight ],
+		} );
+	}
+
+	//
+	// Render
+	//
 	render() {
 		const { attributes, setAttributes } = this.props;
 
+		const colors = [
+			{ name: 'blue', color: '#67B6E3' },
+			{ name: 'white', color: '#fff' },
+			{ name: 'grey', color: '#A4BAB7' },
+		];
+
 		const styles = {
-			height: `${ this.props.attributes.height }px`,
-			background: '#67B6E3',
+			height: `${ attributes.height }px`,
+			background: attributes.mapContainerBackground,
 		};
 
 		return (
@@ -175,8 +262,63 @@ class mapBlock extends Component {
 							} }
 							min={ 2 }
 							max={ 18 }
-							help="choose between 2 and 18, 18 being completely zoomed in"
 						/>
+
+						<p>Map Background</p>
+						<ColorPalette
+							colors={ colors }
+							value={ attributes.mapContainerBackground }
+							onChange={ ( value ) => {
+								setAttributes( {
+									mapContainerBackground: value,
+								} );
+							} }
+						/>
+
+						<h2>Custom Icon</h2>
+						<p>.png file, no larger than 100px by 100px</p>
+						<MediaUpload
+							onSelect={ ( img ) => {
+								if ( ! this.validateIcon( img ) ) {
+									this.showIconError();
+									return;
+								}
+
+								this.updateIcon( img );
+							} }
+							type="image"
+							value={ attributes.customIconID }
+							render={ ( { open } ) => (
+								<Fragment>
+									{
+										this.state.iconError ?
+											<Notice
+												className="leaflet-notice"
+												status="error"
+												onRemove={ () => this.hideIconError() }
+											>
+												<p>Invalid Icon</p>
+											</Notice> : ''
+									}
+
+									<Button
+										onClick={ open }
+										className="components-button is-button is-default is-large"
+									>
+										{
+											attributes.customIconID ?
+												<img
+													src={ attributes.customIconURL }
+													alt="Icon"
+												/> :
+												'upload'
+										}
+									</Button>
+								</Fragment>
+							) }
+						>
+						</MediaUpload>
+
 					</PanelBody>
 				</InspectorControls>
 
@@ -188,11 +330,28 @@ class mapBlock extends Component {
 		);
 	}
 
+	//
+	// Did Mount
+	//
 	componentDidMount() {
 		this.map = L.map( this.mapContainer.current )
 			.setView( this.props.attributes.mapLatLng, this.props.attributes.zoom );
 
-		this.marker = L.marker( this.props.attributes.markerLatLng ).addTo( this.map );
+		const markerOptions = {};
+
+		// Set up custom
+		if ( this.props.attributes.customIconURL ) {
+			markerOptions.icon = this.createCustomIcon(
+				this.props.attributes.customIconURL,
+				this.props.attributes.customIconWidth,
+				this.props.attributes.customIconHeight,
+			);
+		}
+
+		this.marker = L.marker(
+			this.props.attributes.markerLatLng,
+			markerOptions
+		).addTo( this.map );
 
 		// Set Tiles
 		L.tileLayer(
@@ -241,6 +400,9 @@ class mapBlock extends Component {
 		} );
 	}
 
+	//
+	// Did Update
+	//
 	componentDidUpdate( prevProps ) {
 		// Marker will update when the attribute is updated
 		this.marker.setLatLng( this.props.attributes.markerLatLng );
