@@ -24,6 +24,7 @@ import 'leaflet-control-geocoder/dist/images/geocoder.png';
 import 'leaflet-control-geocoder/dist/images/throbber.gif';
 import 'leaflet-control-geocoder';
 
+const pluginUrl = window.gutenberg_leaflet_map_block.plugin_url;
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
 const {
@@ -38,16 +39,17 @@ const {
 
 const {
 	Button,
+	Dashicon,
 	PanelBody,
 	ColorPalette,
 	Placeholder,
-	QueryControls,
 	RangeControl,
 	SelectControl,
 	Spinner,
 	TextControl,
 	ToggleControl,
 	Notice,
+	IconButton,
 } = wp.components;
 
 /**
@@ -195,6 +197,15 @@ class mapBlock extends Component {
 		} );
 	}
 
+	removeIcon() {
+		this.props.setAttributes( {
+			customIconID: null,
+			customIconURL: null,
+			customIconWidth: null,
+			customIconHeight: null,
+		} );
+	}
+
 	validateIcon( icon ) {
 		if (
 			icon.mime !== 'image/png' ||
@@ -314,6 +325,18 @@ class mapBlock extends Component {
 												'upload'
 										}
 									</Button>
+
+									{
+										attributes.customIconID ?
+											<Button
+												onClick={ () => {
+													this.removeIcon();
+												} }
+												title="remove icon"
+											>
+												<Dashicon icon="no" />
+											</Button> : ''
+									}
 								</Fragment>
 							) }
 						>
@@ -339,7 +362,7 @@ class mapBlock extends Component {
 
 		const markerOptions = {};
 
-		// Set up custom
+		// Set up custom marker icon
 		if ( this.props.attributes.customIconURL ) {
 			markerOptions.icon = this.createCustomIcon(
 				this.props.attributes.customIconURL,
@@ -410,6 +433,32 @@ class mapBlock extends Component {
 		// Preview zoom level if changed
 		if ( prevProps.attributes.zoom !== this.props.attributes.zoom ) {
 			this.map.setZoom( this.props.attributes.zoom );
+		}
+
+		// Update Icon
+		if ( prevProps.attributes.customIconID !== this.props.attributes.customIconID ) {
+			let newIcon;
+
+			// Get the new icon if available
+			// Otherwise get the original icon
+			if ( this.props.attributes.customIconID ) {
+				newIcon = this.createCustomIcon(
+					this.props.attributes.customIconURL,
+					this.props.attributes.customIconWidth,
+					this.props.attributes.customIconHeight,
+				);
+			} else {
+				const defaultIcon = Object.assign( {}, L.Icon.Default.prototype.options );
+				const mapImages = pluginUrl + '/vendor/images/';
+
+				defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
+				defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
+				defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
+
+				newIcon = L.icon( defaultIcon );
+			}
+
+			this.marker.setIcon( newIcon );
 		}
 	}
 }
