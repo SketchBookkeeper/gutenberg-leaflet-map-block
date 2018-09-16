@@ -86,7 +86,10 @@ function gutenberg_leaflet_map_block_editor_assets() {
 	wp_localize_script(
 		'gutenberg_leaflet_map_block-block-js',
 		'gutenberg_leaflet_map_block',
-		[ 'mapbox_api_key' => get_option( 'gutenberg_leafletjs_mapbox_api_key' ) ]
+		[
+			'mapbox_api_key' => get_option( 'gutenberg_leafletjs_mapbox_api_key' ),
+			'plugin_url'     => plugins_url( '', dirname( __FILE__ ) ),
+		]
 	);
 
 	// Styles.
