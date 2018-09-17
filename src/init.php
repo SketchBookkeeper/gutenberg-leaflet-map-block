@@ -95,7 +95,7 @@ function gutenberg_leaflet_map_block_editor_assets() {
 	// Styles.
 	wp_enqueue_style(
 		'gutenberg_leaflet_map_block-block-editor-css', // Handle.
-		plugins_url( 'dist/blocks.css', dirname( __FILE__ ) ), // Block editor CSS.
+		plugins_url( 'dist/block.css', dirname( __FILE__ ) ), // Block editor CSS.
 		array( 'wp-edit-blocks' ) // Dependency to include the CSS after it.
 		// filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.editor.build.css' ) // Version: filemtime — Gets file modification time.
 	);

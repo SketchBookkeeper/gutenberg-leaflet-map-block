@@ -304,7 +304,7 @@ class mapBlock extends Component {
 									{
 										this.state.iconError ?
 											<Notice
-												className="leaflet-notice"
+												className="glm-notice"
 												status="error"
 												onRemove={ () => this.hideIconError() }
 											>
@@ -314,7 +314,7 @@ class mapBlock extends Component {
 
 									<Button
 										onClick={ open }
-										className="components-button is-button is-default is-large"
+										className="components-button is-button is-default is-large glm-upload-button"
 									>
 										{
 											attributes.customIconID ?

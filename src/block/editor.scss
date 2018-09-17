@@ -1,15 +1,16 @@
-/**
- * #.# Editor Styles
- *
- * CSS for just Backend enqueued after style.scss
- * which makes it higher in priority.
- */
+// Admin Styles
+// glm - Gutenberg Leafletjs Map
 
-.wp-block-cgb-block-gutenberg-leaflet-map-block {
-	background: $green;
-	border: 0.2rem solid $black;
-	color: $black;
-	margin: 0 auto;
-	max-width: 740px;
-	padding: 2rem;
+@import '../common.scss';
+
+// Notice
+.glm-notice {
+	margin: 0 0 10px !important;
+}
+
+// Icon Upload
+button.is-button.glm-upload-button {
+	height: auto;
+	min-height: 30px;
+	padding: 4px 12px;
 }

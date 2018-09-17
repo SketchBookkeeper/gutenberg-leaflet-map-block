@@ -1,9 +1,3 @@
-/**
- * #.# Styles
- *
- * CSS for both Frontend+Backend.
- */
+// Block Styles
 
-.wp-block-cgb-block-gutenberg-leaflet-map-block {
-	min-height: 300px;
-}
+@import '../common.scss';
