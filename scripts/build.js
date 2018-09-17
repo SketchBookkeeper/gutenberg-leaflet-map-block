@@ -35,8 +35,8 @@ const formatWebpackMessages = require( cgbDevUtilsPath +
 // Build file paths.
 const theCWD = process.cwd();
 const fileBuildJS = path.resolve( theCWD, './dist/blocks.build.js' );
-const fileEditorCSS = path.resolve( theCWD, './dist/blocks.editor.build.css' );
-const fileStyleCSS = path.resolve( theCWD, './dist/blocks.style.build.css' );
+const fileEditorCSS = path.resolve( theCWD, './dist/block.css' );
+const fileStyleCSS = path.resolve( theCWD, './dist/block.css' );
 
 /**
  * Get File Size
@@ -121,14 +121,9 @@ async function build( webpackConfig ) {
 			`${ chalk.dim( '— ./dist/' ) }`,
 			`${ chalk.green( 'blocks.build.js' ) }`,
 			'\n',
-			getFileSize( fileEditorCSS ),
-			`${ chalk.dim( '— ./dist/' ) }`,
-			`${ chalk.green( 'blocks.editor.build.css' ) }`,
-
-			'\n',
 			getFileSize( fileStyleCSS ),
 			`${ chalk.dim( '— ./dist/' ) }`,
-			`${ chalk.green( 'blocks.style.build.css' ) }`,
+			`${ chalk.green( 'block.css' ) }`,
 
 			'\n\n'
 		);
