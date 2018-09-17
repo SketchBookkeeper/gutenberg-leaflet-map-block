@@ -68,7 +68,7 @@ module.exports = {
 					{
 						loader: 'file-loader', // @see https://webpack.js.org/loaders/file-loader/
 						options: {
-							name: 'dist/images/[name].[ext]',
+							name: 'images/[name].[ext]',
 						},
 					},
 				],
