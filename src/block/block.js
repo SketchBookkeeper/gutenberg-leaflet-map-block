@@ -18,6 +18,11 @@
 import './style.scss';
 import './editor.scss';
 
+// Mapbox
+import 'mapbox.js';
+import 'mapbox.js/theme/style.css';
+import 'mapbox.js/theme/images/icons.svg';
+
 // Geocoder
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
 import 'leaflet-control-geocoder/dist/images/geocoder.png';
@@ -51,6 +56,45 @@ const {
 	Notice,
 	IconButton,
 } = wp.components;
+
+const mapStyles = [
+	{
+		label: 'Streets',
+		value: 'mapbox://styles/mapbox/streets-v10',
+	},
+	{
+		label: 'Outdoors',
+		value: 'mapbox://styles/mapbox/outdoors-v10',
+	},
+	{
+		label: 'Light',
+		value: 'mapbox://styles/mapbox/light-v9',
+	},
+	{
+		label: 'Dark',
+		value: 'mapbox://styles/mapbox/dark-v9',
+	},
+	{
+		label: 'Emerald',
+		value: 'mapbox://styles/mapbox/emerald-v8',
+	},
+	{
+		label: 'Satellite',
+		value: 'mapbox://styles/mapbox/satellite-v9',
+	},
+	{
+		label: 'Satellite (labeled)',
+		value: 'mapbox://styles/mapbox/satellite-streets-v10',
+	},
+	{
+		label: 'Day Navigation',
+		value: 'mapbox://styles/mapbox/navigation-preview-day-v4',
+	},
+	{
+		label: 'Night Navigation',
+		value: 'mapbox://styles/mapbox/navigation-preview-night-v4',
+	},
+];
 
 /**
  * Register: a Gutenberg Block.
@@ -98,7 +142,7 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 		},
 		mapContainerBackground: {
 			type: 'string',
-			default: '#67B6E3',
+			default: 'transparent',
 		},
 		customIconID: {
 			type: 'integer',
@@ -111,6 +155,10 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 		},
 		customIconHeight: {
 			type: 'integer',
+		},
+		mapStyle: {
+			type: 'string',
+			default: 'mapbox://styles/mapbox/outdoors-v10',
 		},
 	},
 
@@ -188,6 +236,12 @@ class mapBlock extends Component {
 		} );
 	}
 
+	updateMapStyle( style ) {
+		this.props.setAttributes( {
+			mapStyle: style,
+		} );
+	}
+
 	updateIcon( icon ) {
 		this.props.setAttributes( {
 			customIconID: icon.id,
@@ -253,6 +307,17 @@ class mapBlock extends Component {
 			<Fragment>
 				<InspectorControls>
 					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
+						<h2><Dashicon icon="admin-appearance" /> Appearance</h2>
+
+						<SelectControl
+							label="Tiles"
+							value={ attributes.mapStyle }
+							options={ mapStyles }
+							onChange={ ( style ) => {
+								this.updateMapStyle( style );
+							} }
+						/>
+
 						<RangeControl
 							label={ __( 'Height' ) }
 							value={ attributes.height }
@@ -275,7 +340,7 @@ class mapBlock extends Component {
 							max={ 18 }
 						/>
 
-						<p>Map Background</p>
+						<p>Map Container Background</p>
 						<ColorPalette
 							colors={ colors }
 							value={ attributes.mapContainerBackground }
@@ -286,7 +351,7 @@ class mapBlock extends Component {
 							} }
 						/>
 
-						<h2>Custom Icon</h2>
+						<h2><Dashicon icon="location" /> Marker Icon</h2>
 						<p>.png file, no larger than 100px by 100px</p>
 						<MediaUpload
 							onSelect={ ( img ) => {
@@ -346,8 +411,8 @@ class mapBlock extends Component {
 				</InspectorControls>
 
 				<div>
-					<p>{ this.props.attributes.address }</p>
 					<div style={ styles } ref={ this.mapContainer }></div>
+					<p className="glm-address">{ this.props.attributes.address }</p>
 				</div>
 			</Fragment>
 		);
@@ -357,8 +422,15 @@ class mapBlock extends Component {
 	// Did Mount
 	//
 	componentDidMount() {
-		this.map = L.map( this.mapContainer.current )
-			.setView( this.props.attributes.mapLatLng, this.props.attributes.zoom );
+		// Get Mapbox access token
+		L.mapbox.accessToken = this.mapboxApiKey;
+
+		// Setup map
+		this.map = L.mapbox.map( this.mapContainer.current );
+		this.map.setView( this.props.attributes.mapLatLng, this.props.attributes.zoom );
+		this.map.setMinZoom( 2 );
+
+		this.mapStyleLayer = L.mapbox.styleLayer( this.props.attributes.mapStyle ).addTo( this.map );
 
 		const markerOptions = {};
 
@@ -371,21 +443,10 @@ class mapBlock extends Component {
 			);
 		}
 
+		// Add Marker
 		this.marker = L.marker(
 			this.props.attributes.markerLatLng,
 			markerOptions
-		).addTo( this.map );
-
-		// Set Tiles
-		L.tileLayer(
-			'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
-			{
-				attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-				maxZoom: 18,
-				minZoom: 2,
-				id: 'mapbox.streets',
-				accessToken: this.mapboxApiKey,
-			}
 		).addTo( this.map );
 
 		// Geocoder search box
@@ -459,6 +520,13 @@ class mapBlock extends Component {
 			}
 
 			this.marker.setIcon( newIcon );
+		}
+
+		// Update Styles
+		if ( prevProps.attributes.mapStyle !== this.props.attributes.mapStyle ) {
+			this.mapStyleLayer.remove();
+
+			this.mapStyleLayer = L.mapbox.styleLayer( this.props.attributes.mapStyle ).addTo( this.map );
 		}
 	}
 }
