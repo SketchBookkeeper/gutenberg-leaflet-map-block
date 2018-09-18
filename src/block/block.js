@@ -9,8 +9,10 @@
  * - Custom Markers
  * - Location, click or lookup
  * - Zoom level
- * - Map Height and Width
- * - Static?
+ * - Map Height
+ * - Hide Zoom
+ * - Popup
+ * - Override popup
  *
  */
 
@@ -57,6 +59,7 @@ const {
 	IconButton,
 } = wp.components;
 
+// Style Options
 const mapStyles = [
 	{
 		label: 'Streets',
@@ -95,6 +98,14 @@ const mapStyles = [
 		value: 'mapbox://styles/mapbox/navigation-preview-night-v4',
 	},
 ];
+
+// Setup default icon
+const defaultIcon = Object.assign( {}, L.Icon.Default.prototype.options );
+const mapImages = pluginUrl + '/vendor/images/';
+
+defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
+defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
+defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
 
 /**
  * Register: a Gutenberg Block.
@@ -146,6 +157,7 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 		},
 		customIconID: {
 			type: 'integer',
+			default: 0,
 		},
 		customIconURL: {
 			type: 'string',
@@ -253,10 +265,10 @@ class mapBlock extends Component {
 
 	removeIcon() {
 		this.props.setAttributes( {
-			customIconID: null,
-			customIconURL: null,
-			customIconWidth: null,
-			customIconHeight: null,
+			customIconID: 0,
+			customIconURL: false,
+			customIconWidth: false,
+			customIconHeight: false,
 		} );
 	}
 
@@ -434,13 +446,15 @@ class mapBlock extends Component {
 
 		const markerOptions = {};
 
-		// Set up custom marker icon
-		if ( this.props.attributes.customIconURL ) {
+		// Set up custom marker icon or default
+		if ( this.props.attributes.customIconID !== 0 ) {
 			markerOptions.icon = this.createCustomIcon(
 				this.props.attributes.customIconURL,
 				this.props.attributes.customIconWidth,
 				this.props.attributes.customIconHeight,
 			);
+		} else {
+			markerOptions.icon = L.icon( defaultIcon );
 		}
 
 		// Add Marker
@@ -509,13 +523,6 @@ class mapBlock extends Component {
 					this.props.attributes.customIconHeight,
 				);
 			} else {
-				const defaultIcon = Object.assign( {}, L.Icon.Default.prototype.options );
-				const mapImages = pluginUrl + '/vendor/images/';
-
-				defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
-				defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
-				defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
-
 				newIcon = L.icon( defaultIcon );
 			}
 
