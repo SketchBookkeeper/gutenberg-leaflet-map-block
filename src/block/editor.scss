@@ -23,3 +23,10 @@ p.glm-address {
 		font-size: 0.7rem;
 	}
 }
+
+// Controls
+.leaflet-control-zoom {
+	.glm-hide-controls & {
+		display: none;
+	}
+}

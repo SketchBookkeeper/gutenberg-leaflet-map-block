@@ -151,6 +151,10 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			type: 'integer',
 			default: 12,
 		},
+		showControls: {
+			type: 'boolean',
+			default: true,
+		},
 		mapContainerBackground: {
 			type: 'string',
 			default: 'transparent',
@@ -254,6 +258,12 @@ class mapBlock extends Component {
 		} );
 	}
 
+	toggleShowControls() {
+		this.props.setAttributes( {
+			showControls: ! this.props.attributes.showControls,
+		} );
+	}
+
 	updateIcon( icon ) {
 		this.props.setAttributes( {
 			customIconID: icon.id,
@@ -352,6 +362,15 @@ class mapBlock extends Component {
 							max={ 18 }
 						/>
 
+						<ToggleControl
+							label="Zoom Controls"
+							help={ attributes.showControls ? 'Show Controls' : 'Hide Controls' }
+							checked={ attributes.showControls }
+							onChange={ () => {
+								this.toggleShowControls();
+							} }
+						/>
+
 						<p>Map Container Background</p>
 						<ColorPalette
 							colors={ colors }
@@ -422,7 +441,7 @@ class mapBlock extends Component {
 					</PanelBody>
 				</InspectorControls>
 
-				<div>
+				<div className={ attributes.showControls ? 'glm-show-controls' : 'glm-hide-controls' }>
 					<div style={ styles } ref={ this.mapContainer }></div>
 					<p className="glm-address">{ this.props.attributes.address }</p>
 				</div>
