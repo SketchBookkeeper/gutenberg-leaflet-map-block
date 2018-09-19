@@ -15,17 +15,21 @@ const {
 
 const {
 	Button,
-	Dashicon,
-	PanelBody,
 	ColorPalette,
+	Dashicon,
+	Notice,
+	PanelBody,
 	RangeControl,
 	SelectControl,
+	TextareaControl,
 	ToggleControl,
-	Notice,
 } = wp.components;
 
+// Path to plugin assets
 const pluginUrl = window.gutenberg_leaflet_map_block.plugin_url;
 
+// Array of Mapbox styles
+// @see https://www.mapbox.com/api-documentation/#styles
 import { mapStyles } from './map-styles';
 
 // Mapbox
@@ -39,10 +43,12 @@ import 'leaflet-control-geocoder/dist/images/geocoder.png';
 import 'leaflet-control-geocoder/dist/images/throbber.gif';
 import 'leaflet-control-geocoder';
 
- // Setup default icon
+// Setup default icon
+// Copy the default Icon Class' Icon Object
 const defaultIcon = Object.assign( {}, L.Icon.Default.prototype.options );
 const mapImages = pluginUrl + '/vendor/images/';
 
+// Point default Object to assets
 defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
 defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
 defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
@@ -128,6 +134,18 @@ export class MapBlock extends Component {
 		} );
 	}
 
+	toggleShowPopup() {
+		this.props.setAttributes( {
+			showPopup: ! this.props.attributes.showPopup,
+		} );
+	}
+
+	updatePopupContent( content ) {
+		this.props.setAttributes( {
+			popupContent: content,
+		} );
+	}
+
 	updateIcon( icon ) {
 		this.props.setAttributes( {
 			customIconID: icon.id,
@@ -193,6 +211,12 @@ export class MapBlock extends Component {
 			<Fragment>
 				<InspectorControls>
 					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
+						<p>Set the marker location by clicking on the map or use the magnify glass to find a location.</p>
+
+						<h2><Dashicon icon="location-alt" /> Marker&apos;s Location</h2>
+
+						<p>{ this.props.attributes.address }</p>
+
 						<h2><Dashicon icon="admin-appearance" /> Appearance</h2>
 
 						<SelectControl
@@ -228,7 +252,7 @@ export class MapBlock extends Component {
 
 						<ToggleControl
 							label="Zoom Controls"
-							help={ attributes.showControls ? 'Show Controls' : 'Hide Controls' }
+							help={ attributes.showControls ? 'Show Controls on frontend' : 'Hide Controls on frontend' }
 							checked={ attributes.showControls }
 							onChange={ () => {
 								this.toggleShowControls();
@@ -302,12 +326,29 @@ export class MapBlock extends Component {
 						>
 						</MediaUpload>
 
+						<p>By default, a popup with the address will appear when the marker is clicked.</p>
+						<ToggleControl
+							label="Show Popup"
+							checked={ attributes.showPopup }
+							onChange={ () => {
+								this.toggleShowPopup();
+							} }
+						/>
+
+						{ attributes.showPopup ?
+							<TextareaControl
+								label="Popup Text"
+								value={ attributes.popupContent }
+								placeholder={ attributes.address }
+								onChange={ ( text ) => this.updatePopupContent( text ) }
+							/> : ''
+						}
+
 					</PanelBody>
 				</InspectorControls>
 
 				<div className={ attributes.showControls ? 'glm-show-controls' : 'glm-hide-controls' }>
 					<div style={ styles } ref={ this.mapContainer }></div>
-					<p className="glm-address">{ this.props.attributes.address }</p>
 				</div>
 			</Fragment>
 		);

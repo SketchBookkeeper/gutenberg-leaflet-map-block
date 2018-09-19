@@ -3,17 +3,6 @@
  *
  * Registering a basic block with Gutenberg.
  *
- * Wishlist Options
- *
- * - Custom Colors
- * - Custom Markers
- * - Location, click or lookup
- * - Zoom level
- * - Map Height
- * - Hide Zoom
- * - Popup
- * - Override popup
- *
  */
 
 //  Import CSS.
@@ -62,11 +51,11 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			default: 'London, Greater London, England, United Kingdom',
 		},
 		height: {
-			type: 'integer',
+			type: 'number',
 			default: 300,
 		},
 		zoom: {
-			type: 'integer',
+			type: 'number',
 			default: 12,
 		},
 		showControls: {
@@ -78,21 +67,28 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 			default: 'transparent',
 		},
 		customIconID: {
-			type: 'integer',
+			type: 'number',
 			default: 0,
 		},
 		customIconURL: {
 			type: 'string',
 		},
 		customIconWidth: {
-			type: 'integer',
+			type: 'number',
 		},
 		customIconHeight: {
-			type: 'integer',
+			type: 'number',
 		},
 		mapStyle: {
 			type: 'string',
 			default: 'mapbox://styles/mapbox/outdoors-v10',
+		},
+		showPopup: {
+			type: 'boolean',
+			default: true,
+		},
+		popupContent: {
+			type: 'string',
 		},
 	},
 
