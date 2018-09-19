@@ -51,12 +51,24 @@ export class MapBlock extends Component {
 	constructor( props ) {
 		super( props );
 
-		this.mapContainer = React.createRef();
-		this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
-
 		this.state = {
 			iconError: false,
+			apiKeyWarning: false,
 		};
+
+		this.mapContainer = React.createRef();
+		this.mapboxApiKey = null;
+
+		// check for api key
+		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
+			this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
+		} else {
+			this.mapboxApiKey = process.env.MAPBOXAPIKEY;
+
+			this.setState( {
+				apiKeyWarning: true,
+			} );
+		}
 
 		this.showIconError.bind( this );
 		this.hideIconError.bind( this );

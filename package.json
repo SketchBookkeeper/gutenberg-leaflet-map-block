@@ -16,6 +16,9 @@
     "chalk": "^2.3.0",
     "cross-env": "^5.0.1",
     "cross-spawn": "^5.1.0",
+    "css-loader": "^1.0.0",
+    "dotenv": "^6.0.0",
+    "dotenv-webpack": "^1.5.7",
     "eslint": "^4.15.0",
     "eslint-config-wordpress": "^2.0.0",
     "eslint-plugin-jest": "^21.6.1",
@@ -38,6 +41,7 @@
     "resolve-pkg": "^1.0.0",
     "sass-loader": "^6.0.6",
     "shelljs": "^0.8.0",
+    "style-loader": "^0.19.1",
     "update-notifier": "^2.3.0",
     "webpack": "^3.1.0"
   },
@@ -86,9 +90,5 @@
         }
       ]
     ]
-  },
-  "devDependencies": {
-    "css-loader": "^1.0.0",
-    "style-loader": "^0.19.1"
   }
 }

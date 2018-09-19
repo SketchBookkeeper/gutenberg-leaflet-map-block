@@ -23,9 +23,11 @@
 const paths = require( './paths' );
 const autoprefixer = require( 'autoprefixer' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
+const Dotenv = require( 'dotenv-webpack' );
 
 // Export configuration.
 module.exports = {
+	target: 'node', // @see https://github.com/motdotla/dotenv/issues/172
 	entry: {
 		'./dist/blocks.build': paths.pluginBlocksJs, // 'name' : 'path/file.ext'.
 		'./dist/frontend': paths.pluginFrontendJs,
@@ -68,7 +70,7 @@ module.exports = {
 					{
 						loader: 'file-loader', // @see https://webpack.js.org/loaders/file-loader/
 						options: {
-							name: 'images/[name].[ext]',
+							name: '../dist/images/[name].[ext]',
 						},
 					},
 				],
@@ -76,7 +78,10 @@ module.exports = {
 		],
 	},
 	// Add plugins.
-	plugins: [ new ExtractTextPlugin( './dist/block.css' ) ],
+	plugins: [
+		new ExtractTextPlugin( './dist/block.css' ),
+		new Dotenv(),
+	],
 	stats: 'minimal',
 	// stats: 'errors-only',
 	// Add externals.

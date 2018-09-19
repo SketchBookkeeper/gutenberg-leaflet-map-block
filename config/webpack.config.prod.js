@@ -24,12 +24,14 @@ const paths = require( './paths' );
 const webpack = require( 'webpack' );
 const autoprefixer = require( 'autoprefixer' );
 const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
+const Dotenv = require( 'dotenv-webpack' );
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP === 'true';
 
 // Export configuration.
 module.exports = {
+	target: 'node',
 	entry: {
 		'./dist/blocks.build': paths.pluginBlocksJs, // 'name' : 'path/file.ext'.
 		'./dist/frontend': paths.pluginFrontendJs,
@@ -72,7 +74,7 @@ module.exports = {
 					{
 						loader: 'file-loader',
 						options: {
-							name: 'images/[name].[ext]',
+							name: '../dist/images/[name].[ext]',
 						},
 					},
 				],
@@ -81,6 +83,7 @@ module.exports = {
 	},
 	// Add plugins.
 	plugins: [
+		new Dotenv(),
 		new ExtractTextPlugin( './dist/block.css' ),
 		// Minify the code.
 		new webpack.optimize.UglifyJsPlugin( {
