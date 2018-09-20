@@ -211,13 +211,13 @@ export class MapBlock extends Component {
 			<Fragment>
 				<InspectorControls>
 					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
-						<p>Set the marker location by clicking on the map or use the magnify glass to find a location.</p>
+						<p>{ __( 'Set the marker location by clicking on the map or use the magnify glass to find a location.' ) }</p>
 
-						<h2><Dashicon icon="location-alt" /> Marker&apos;s Location</h2>
+						<h2><Dashicon icon="location-alt" /> { __( 'Marker\'s Location' ) }</h2>
 
 						<p>{ this.props.attributes.address }</p>
 
-						<h2><Dashicon icon="admin-appearance" /> Appearance</h2>
+						<h2><Dashicon icon="admin-appearance" /> { __( 'Appearance' ) }</h2>
 
 						<SelectControl
 							label="Map Theme"
@@ -259,7 +259,7 @@ export class MapBlock extends Component {
 							} }
 						/>
 
-						<p>Map Container Background</p>
+						<p>{ __( 'Map Container Background' ) }</p>
 						<ColorPalette
 							colors={ colors }
 							value={ attributes.mapContainerBackground }
@@ -270,8 +270,8 @@ export class MapBlock extends Component {
 							} }
 						/>
 
-						<h2><Dashicon icon="location" /> Marker Icon</h2>
-						<p>.png file, no larger than 100px by 100px</p>
+						<h2><Dashicon icon="location" /> { __( 'Marker Icon' ) }</h2>
+						<p>{ __( '.png file, no larger than 100px by 100px' ) }</p>
 						<MediaUpload
 							onSelect={ ( img ) => {
 								if ( ! this.validateIcon( img ) ) {
@@ -326,7 +326,7 @@ export class MapBlock extends Component {
 						>
 						</MediaUpload>
 
-						<p>By default, a popup with the address will appear when the marker is clicked.</p>
+						<p>{ __( 'By default, a popup with the address will appear when the marker is clicked.' ) }</p>
 						<ToggleControl
 							label="Show Popup"
 							checked={ attributes.showPopup }
@@ -407,9 +407,10 @@ export class MapBlock extends Component {
 			const latlng = [ e.latlng.lat, e.latlng.lng ];
 
 			// Get address name from latlng
-			L.Control.Geocoder.nominatim().reverse(
+			// Reverse lookup
+			L.Control.Geocoder.mapbox( this.mapboxApiKey ).reverse(
 				e.latlng,
-				18,
+				18, // Detail level
 				( results ) => {
 					// Update the location
 					if ( ! results.hasOwnProperty( 0 ) ) {
