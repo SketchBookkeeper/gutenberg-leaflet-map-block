@@ -442,6 +442,8 @@ export class MapBlock extends Component {
 
 		// Click to set location
 		this.map.on( 'click', e => {
+			if ( ! e.hasOwnProperty( 'latlng' ) ) return;
+
 			const latlng = [ e.latlng.lat, e.latlng.lng ];
 
 			// Get address name from latlng
