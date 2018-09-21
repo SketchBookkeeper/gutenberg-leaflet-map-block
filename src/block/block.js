@@ -12,7 +12,7 @@ import './editor.scss';
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
 
-import { MapBlock } from './edit';
+import { MapBlock, MapContainer } from './edit';
 
 /**
  * Register: a Gutenberg Block.
@@ -93,7 +93,7 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 	},
 
 	edit: function( props ) {
-		return new MapBlock( props );
+		return new MapContainer( props );
 	},
 
 	save: function( props ) {

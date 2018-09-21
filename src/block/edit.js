@@ -53,6 +53,48 @@ defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
 defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
 defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
 
+export class MapContainer extends Component {
+	constructor( props ) {
+		super( props );
+
+		this.state = {
+			component: MapPlaceholder,
+		};
+
+		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
+			this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
+		} else {
+			this.mapboxApiKey = process.env.MAPBOXAPIKEY;
+		}
+
+		// Check if the mapbox api key is valid before continuing.
+		// Otherwise we'll show an error to the user
+		determineComponent( this.mapboxApiKey )
+			.then( response => {
+				if ( response.code === 'TokenValid' ) {
+					this.setState( { component: MapBlock } );
+				}
+			} );
+	}
+
+	render() {
+		// return <MapBlock { ...this.props } />;
+		return React.createElement( this.state.component, Object.assign({}, this.props) );
+	}
+}
+
+/**
+ * Map Placeholder
+ */
+export class MapPlaceholder extends Component {
+	render() {
+		return <p>Im a Placeholder</p>
+	}
+}
+
+/**
+ * MapBlock
+ */
 export class MapBlock extends Component {
 	constructor( props ) {
 		super( props );
@@ -63,17 +105,14 @@ export class MapBlock extends Component {
 		};
 
 		this.mapContainer = React.createRef();
-		this.mapboxApiKey = null;
+		this.mapboxApiKey = '';
 
-		// check for api key
+		// Get user's mapbox key if available,
+		// Otherwise use the plugin's api.
 		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
 			this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
 		} else {
 			this.mapboxApiKey = process.env.MAPBOXAPIKEY;
-
-			this.setState( {
-				apiKeyWarning: true,
-			} );
 		}
 
 		this.showIconError.bind( this );
@@ -358,14 +397,13 @@ export class MapBlock extends Component {
 	// Did Mount
 	//
 	componentDidMount() {
-		// Get Mapbox access token
+		// Set Mapbox access token
 		L.mapbox.accessToken = this.mapboxApiKey;
 
 		// Setup map
 		this.map = L.mapbox.map( this.mapContainer.current );
 		this.map.setView( this.props.attributes.mapLatLng, this.props.attributes.zoom );
 		this.map.setMinZoom( 2 );
-
 		this.mapStyleLayer = L.mapbox.styleLayer( this.props.attributes.mapStyle ).addTo( this.map );
 
 		const markerOptions = {};
@@ -461,4 +499,15 @@ export class MapBlock extends Component {
 			this.mapStyleLayer = L.mapbox.styleLayer( this.props.attributes.mapStyle ).addTo( this.map );
 		}
 	}
+}
+
+function determineComponent( apiKey ) {
+	return new Promise( ( resolve, reject ) => {
+		$.get(
+			`https://api.mapbox.com/tokens/v2?access_token=${ apiKey }`,
+			( response ) => {
+				resolve( response );
+			}
+		);
+	} );
 }
