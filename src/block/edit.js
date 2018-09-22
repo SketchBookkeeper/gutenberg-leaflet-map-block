@@ -58,7 +58,7 @@ export class MapContainer extends Component {
 		super( props );
 
 		this.state = {
-			component: MapPlaceholder,
+			component: mapLoader,
 		};
 
 		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
@@ -78,7 +78,6 @@ export class MapContainer extends Component {
 	}
 
 	render() {
-		// return <MapBlock { ...this.props } />;
 		return React.createElement( this.state.component, Object.assign({}, this.props) );
 	}
 }
@@ -86,9 +85,14 @@ export class MapContainer extends Component {
 /**
  * Map Placeholder
  */
-export class MapPlaceholder extends Component {
+export class mapLoader extends Component {
 	render() {
-		return <p>Im a Placeholder</p>
+		return (
+			<p className="glm-flex glm-align-center glm-gray">
+				<Dashicon icon="update" className="glm-loader" />
+				{ __( 'Loading Map' ) }
+			</p>
+		);
 	}
 }
 
@@ -252,11 +256,11 @@ export class MapBlock extends Component {
 					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
 						<p>{ __( 'Set the marker location by clicking on the map or use the magnify glass to find a location.' ) }</p>
 
-						<h2><Dashicon icon="location-alt" /> { __( 'Marker\'s Location' ) }</h2>
+						<h2 className="glm-flex glm-align-center"><Dashicon icon="location-alt" /> { __( 'Marker\'s Location' ) }</h2>
 
 						<p>{ this.props.attributes.address }</p>
 
-						<h2><Dashicon icon="admin-appearance" /> { __( 'Appearance' ) }</h2>
+						<h2 className="glm-flex glm-align-center"><Dashicon icon="admin-appearance" /> { __( 'Appearance' ) }</h2>
 
 						<SelectControl
 							label="Map Theme"
@@ -309,7 +313,7 @@ export class MapBlock extends Component {
 							} }
 						/>
 
-						<h2><Dashicon icon="location" /> { __( 'Marker Icon' ) }</h2>
+						<h2 className="glm-flex glm-align-center"><Dashicon icon="location" /> { __( 'Marker Icon' ) }</h2>
 						<p>{ __( '.png file, no larger than 100px by 100px' ) }</p>
 						<MediaUpload
 							onSelect={ ( img ) => {
@@ -442,15 +446,17 @@ export class MapBlock extends Component {
 
 		// Click to set location
 		this.map.on( 'click', e => {
-			if ( ! e.hasOwnProperty( 'latlng' ) ) return;
+			if ( ! e.hasOwnProperty( 'latlng' ) ) {
+				return;
+			}
 
 			const latlng = [ e.latlng.lat, e.latlng.lng ];
 
 			// Get address name from latlng
 			// Reverse lookup
-			L.Control.Geocoder.mapbox( this.mapboxApiKey ).reverse(
+			L.Control.Geocoder.nominatim().reverse(
 				e.latlng,
-				18, // Detail level
+				18,
 				( results ) => {
 					// Update the location
 					if ( ! results.hasOwnProperty( 0 ) ) {

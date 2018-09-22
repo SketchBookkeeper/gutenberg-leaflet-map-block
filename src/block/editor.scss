@@ -3,6 +3,21 @@
 
 @import '../common.scss';
 
+// Loader
+.glm-loader {
+	animation: glm-loader 1000ms ease-in-out infinite;
+}
+
+@keyframes glm-loader {
+	from {
+		transform: rotate(0);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 // Notice
 .glm-notice {
 	margin: 0 0 10px !important;
@@ -16,17 +31,22 @@ button.is-button.glm-upload-button {
 	padding: 4px 12px;
 }
 
-// Address
-p.glm-address {
-	.editor-block-list__block & {
-		color: $black;
-		font-size: 0.7rem;
-	}
-}
-
 // Controls
 .leaflet-control-zoom {
 	.glm-hide-controls & {
 		display: none;
 	}
+}
+
+// Utilities
+.glm-flex {
+	display: flex;
+}
+
+.glm-align-center {
+	align-items: center;
+}
+
+.glm-gray {
+	color: $gray;
 }
