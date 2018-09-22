@@ -1,15 +1,15 @@
 <?php
 /**
  * Plugin Name: Gutenberg Leaflet Map Block
- * Plugin URI: https://github.com/ahmadawais/create-guten-block/
+ * Plugin URI:
  * Description: gutenberg-leaflet-map-block — is a Gutenberg plugin created via create-guten-block.
  * Author: Paul Allen
- * Author URI:
+ * Author URI: https://github.com/SketchBookkeeper
  * Version: 1.0.0
- * License: GPL2+
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * License: MIT
+ * License URI: https://github.com/SketchBookkeeper/gutenberg-leaflet-map-block/blob/master/LICENSE
  *
- * @package CGB
+ * @package GLM
  */
 
 // Exit if accessed directly.
