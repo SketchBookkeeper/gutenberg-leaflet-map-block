@@ -23,6 +23,7 @@ const {
 	SelectControl,
 	TextareaControl,
 	ToggleControl,
+	Spinner,
 } = wp.components;
 
 // Path to plugin assets
@@ -53,45 +54,78 @@ defaultIcon.iconUrl = mapImages + defaultIcon.iconUrl;
 defaultIcon.iconRetinaUrl = mapImages + defaultIcon.iconRetinaUrl;
 defaultIcon.shadowUrl = mapImages + defaultIcon.shadowUrl;
 
+/**
+ * MapContainer
+ * Dynamically render inner components based on API key validation.
+ */
 export class MapContainer extends Component {
 	constructor( props ) {
 		super( props );
 
+		props.apiKeyWarning = false;
+
 		this.state = {
-			component: mapLoader,
+			component: MapLoader,
 		};
 
+		// Get API Key
 		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
 			this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
 		} else {
+			props.apiKeyWarning = true;
 			this.mapboxApiKey = process.env.MAPBOXAPIKEY;
 		}
 
 		// Check if the mapbox api key is valid before continuing.
 		// Otherwise we'll show an error to the user
-		determineComponent( this.mapboxApiKey )
+		checkMapboxApiKey( this.mapboxApiKey )
 			.then( response => {
 				if ( response.code === 'TokenValid' ) {
+					this.props.mapboxApiKey = this.mapboxApiKey;
 					this.setState( { component: MapBlock } );
+				} else {
+					this.props.code = response.code;
+					this.setState( { component: MapNotice } );
 				}
 			} );
 	}
 
 	render() {
-		return React.createElement( this.state.component, Object.assign({}, this.props) );
+		return React.createElement( this.state.component, Object.assign( {}, this.props ) );
 	}
 }
 
 /**
- * Map Placeholder
+ * MapLoader
  */
-export class mapLoader extends Component {
+export class MapLoader extends Component {
 	render() {
 		return (
 			<p className="glm-flex glm-align-center glm-gray">
-				<Dashicon icon="update" className="glm-loader" />
+				<Spinner />
 				{ __( 'Loading Map' ) }
 			</p>
+		);
+	}
+}
+
+/**
+ * MapNotice
+ * Something is wrong with the provided API Key,
+ * show a notice rather than the map.
+ */
+export class MapNotice extends Component {
+	render() {
+		return (
+			<Notice
+				className="glm-notice"
+				status="warning"
+				isDismissible={ false }
+			>
+				<p>{ __( 'Leaflet Map' ) }</p>
+				<p>{ __( 'Opps, something went wrong. Check your Mapbox access token in general settings' ) }</p>
+				<code>{ this.props.code }</code>
+			</Notice>
 		);
 	}
 }
@@ -109,15 +143,7 @@ export class MapBlock extends Component {
 		};
 
 		this.mapContainer = React.createRef();
-		this.mapboxApiKey = '';
-
-		// Get user's mapbox key if available,
-		// Otherwise use the plugin's api.
-		if ( window.gutenberg_leaflet_map_block.mapbox_api_key ) {
-			this.mapboxApiKey = window.gutenberg_leaflet_map_block.mapbox_api_key;
-		} else {
-			this.mapboxApiKey = process.env.MAPBOXAPIKEY;
-		}
+		this.mapboxApiKey = props.mapboxApiKey;
 
 		this.showIconError.bind( this );
 		this.hideIconError.bind( this );
@@ -207,6 +233,7 @@ export class MapBlock extends Component {
 		} );
 	}
 
+	// Validate the icon in formatted correctly
 	validateIcon( icon ) {
 		if (
 			icon.mime !== 'image/png' ||
@@ -254,7 +281,7 @@ export class MapBlock extends Component {
 			<Fragment>
 				<InspectorControls>
 					<PanelBody title={ __( 'Leaflet Map Settings' ) }>
-						<p>{ __( 'Set the marker location by clicking on the map or use the magnify glass to find a location.' ) }</p>
+						<p>{ __( 'Set the marker\'s location by clicking on the map or use the magnifying glass to find a location.' ) }</p>
 
 						<h2 className="glm-flex glm-align-center"><Dashicon icon="location-alt" /> { __( 'Marker\'s Location' ) }</h2>
 
@@ -509,7 +536,14 @@ export class MapBlock extends Component {
 	}
 }
 
-function determineComponent( apiKey ) {
+/**
+ * checkMapboxApiKey
+ * Check provided api key against the Mapbox Api.
+ *
+ * @param {string } apiKey Mapbox api key/access token.
+ * @returns {object} Mapbox response.
+ */
+function checkMapboxApiKey( apiKey ) {
 	return new Promise( ( resolve, reject ) => {
 		$.get(
 			`https://api.mapbox.com/tokens/v2?access_token=${ apiKey }`,

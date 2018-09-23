@@ -3,21 +3,6 @@
 
 @import '../common.scss';
 
-// Loader
-.glm-loader {
-	animation: glm-loader 1000ms ease-in-out infinite;
-}
-
-@keyframes glm-loader {
-	from {
-		transform: rotate(0);
-	}
-
-	to {
-		transform: rotate(360deg);
-	}
-}
-
 // Notice
 .glm-notice {
 	margin: 0 0 10px !important;

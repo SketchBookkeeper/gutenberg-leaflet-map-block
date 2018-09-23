@@ -32,11 +32,11 @@ export const mapStyles = [
 		value: 'mapbox://styles/mapbox/satellite-streets-v10',
 	},
 	{
-		label: 'Day Navigation',
+		label: 'Day Navigation (traffic)',
 		value: 'mapbox://styles/mapbox/navigation-preview-day-v4',
 	},
 	{
-		label: 'Night Navigation',
+		label: 'Night Navigation (traffic)',
 		value: 'mapbox://styles/mapbox/navigation-preview-night-v4',
 	},
 ];

@@ -12,7 +12,7 @@ import './editor.scss';
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
 
-import { MapBlock, MapContainer } from './edit';
+import { MapContainer } from './edit';
 
 /**
  * Register: a Gutenberg Block.
@@ -27,7 +27,7 @@ import { MapBlock, MapContainer } from './edit';
  * @return {?WPBlock}          The block, if it has been successfully
  *                             registered; otherwise `undefined`.
  */
-registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-block', {
+registerBlockType( 'glm/block-gutenberg-leaflet-map-block', {
 	// Block name. Block names must be string that contains a namespace prefix. Example: my-plugin/my-custom-block.
 	title: __( 'Leaflet Map' ), // Block title.
 	icon: 'location', // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
@@ -97,11 +97,33 @@ registerBlockType( 'gutenberg-leaflet-map-block/block-gutenberg-leaflet-map-bloc
 	},
 
 	save: function( props ) {
+		const styles = {
+			height: `${ props.attributes.height }px`,
+			background: props.attributes.mapContainerBackground,
+		};
+
 		return (
-			<div data-gutenberg-leaflet-map-block='{
-				"maxZoom": 18,
-				"id": "mapbox.streets"
-			}' ></div>
+			<div className="glm-frontend-block">
+				<script type="application/json">
+					{ JSON.stringify( props.attributes ) }
+				</script>
+
+				<div
+					className="glm-map"
+					style={ styles }
+				>
+				</div>
+
+				<address className="glm-address glm-screen-reader-text">
+					{ props.attributes.address }
+				</address>
+
+				{ props.attributes.popupContent ?
+					<p className="glm-custom-popup-content glm-screen-reader-text">
+						{ props.attributes.popupContent }
+					</p> : ''
+				}
+			</div>
 		);
 	},
 } );
