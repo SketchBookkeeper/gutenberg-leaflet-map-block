@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Gutenberg Leaflet Map Block
  * Plugin URI:
- * Description: gutenberg-leaflet-map-block — is a Gutenberg plugin created via create-guten-block.
+ * Description: Add beautiful custom maps to your Gutenberg editor. Supports Custom Icons, Popups and a selection of map themes.
  * Author: Paul Allen
  * Author URI: https://github.com/SketchBookkeeper
  * Version: 1.0.0
@@ -10,6 +10,13 @@
  * License URI: https://github.com/SketchBookkeeper/gutenberg-leaflet-map-block/blob/master/LICENSE
  *
  * @package GLM
+ */
+
+/**
+ * TODOs
+ * Guide on getting mapbox api key
+ * Notice if not using own
+ * Frontend rendering
  */
 
 // Exit if accessed directly.
